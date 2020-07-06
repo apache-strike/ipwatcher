@@ -8,9 +8,14 @@ import requests
 from colored import fore, back, style
 import threading
 
+<<<<<<< HEAD
 def check_connection(ip_type,previous_ip,previous_interface,t2=None):
 
     current_ip= str.rstrip(os.popen('curl -s ifconfig.io').read())
+=======
+def check_connection(ip_type, t2=None):
+    global current_ip
+>>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
 
     if ip_type == 'tor' or ip_type == 'tor_changing':
         r=requests.get(url='https://check.torproject.org/?lang=en')
@@ -23,14 +28,22 @@ def check_connection(ip_type,previous_ip,previous_interface,t2=None):
             raise SystemExit
         else:
             previous_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
+<<<<<<< HEAD
             if previous_ip != current_ip and current_ip != '':
                 print(fore.LIGHT_GREEN + style.BOLD + "TOR IP changing..." + style.RESET)
                 previous_ip = current_ip
                 print("Your " + style.BOLD + "new TOR IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + previous_ip + style.RESET)
+=======
+            if current_ip != previous_ip and previous_ip != '':
+                print(fore.LIGHT_GREEN + style.BOLD + "TOR IP changing..." + style.RESET)
+                current_ip = previous_ip
+                print("Your " + style.BOLD + "new TOR IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + current_ip + style.RESET)
+>>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
                 print(fore.LIGHT_GREEN + style.BOLD + "Running..." + style.RESET)
             time.sleep(2)
 
     if ip_type == 'not_tor':
+<<<<<<< HEAD
 
 
 
@@ -49,6 +62,13 @@ def check_connection(ip_type,previous_ip,previous_interface,t2=None):
         if current_ip != previous_ip and current_interface != previous_interface:
             banner('ip_changed',previous_ip)
             os.popen('sudo service network-manager stop')
+=======
+        previous_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
+        interface = os.popen('ip tuntap show | cut -c1-4').read()
+        if current_ip != previous_ip and interface == '':
+            interface = os.popen('ip tuntap show | cut -c1-4').read()
+            banner('ip_changed',previous_ip)
+>>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
             raise SystemExit
         time.sleep(5)
 
@@ -58,8 +78,11 @@ def change_tor_ip():
 
 def banner(type, ip=None):
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
     if type == 'tor' or type == 'tor_changing':
         os.system('clear')
         print ("Your " + style.BOLD + "current IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + current_ip + style.RESET)
@@ -68,8 +91,11 @@ def banner(type, ip=None):
 
     if type == 'not_tor':
         os.system('clear')
+<<<<<<< HEAD
 
         interface = os.popen('ip tuntap show | tail -n 1 | cut -c1-4').read()
+=======
+>>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
         print("The script will use your first VPN interface, it will not work well if you use several VPNs at the same time")
         print(fore.LIGHT_GREEN + style.BOLD + "Checking VPN network interface and IP..." + style.RESET)
         print ("Your " + style.BOLD + "current IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + current_ip + style.RESET)
@@ -134,7 +160,10 @@ def main():
     global ip_type
     t = 0
     current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
+<<<<<<< HEAD
     current_interface = os.popen('ip tuntap show | tail -n 1 | cut -c1-4').read()
+=======
+>>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
 
     if os.geteuid() != 0:
         exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
@@ -142,7 +171,10 @@ def main():
 
     ip_type = options()
     banner(ip_type)
+<<<<<<< HEAD
 
+=======
+>>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
     while True:
         try:
             if ip_type == 'tor_changing':
@@ -157,11 +189,15 @@ def main():
                     t2.start()
 
             else:
+<<<<<<< HEAD
 
                 check_connection(ip_type,current_ip,current_interface)
 
 
 
+=======
+                check_connection(ip_type)
+>>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
 
         except requests.exceptions.ConnectTimeout:
             t = time.localtime()
