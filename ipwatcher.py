@@ -6,100 +6,58 @@ import os
 import time
 import requests
 from colored import fore, back, style
-import threading
+#import threading
+from multiprocessing import Process, Lock
 
-<<<<<<< HEAD
-def check_connection(ip_type,previous_ip,previous_interface,t2=None):
+def check_connection_VPN(previous_ip, previous_interface):
 
-    current_ip= str.rstrip(os.popen('curl -s ifconfig.io').read())
-=======
-def check_connection(ip_type, t2=None):
-    global current_ip
->>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
-
-    if ip_type == 'tor' or ip_type == 'tor_changing':
-        r=requests.get(url='https://check.torproject.org/?lang=en')
-        r2=requests.get(url='https://www.dan.me.uk/tornodes')
-        if 'Sorry. You are not using Tor.' in r.text or 'Forbidden' not in r2.text:
-            os.popen('sudo service network-manager stop')
-            previous_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
-            banner('ip_changed',previous_ip)
-            t2.join()
-            raise SystemExit
-        else:
-            previous_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
-<<<<<<< HEAD
-            if previous_ip != current_ip and current_ip != '':
-                print(fore.LIGHT_GREEN + style.BOLD + "TOR IP changing..." + style.RESET)
-                previous_ip = current_ip
-                print("Your " + style.BOLD + "new TOR IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + previous_ip + style.RESET)
-=======
-            if current_ip != previous_ip and previous_ip != '':
-                print(fore.LIGHT_GREEN + style.BOLD + "TOR IP changing..." + style.RESET)
-                current_ip = previous_ip
-                print("Your " + style.BOLD + "new TOR IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + current_ip + style.RESET)
->>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
-                print(fore.LIGHT_GREEN + style.BOLD + "Running..." + style.RESET)
-            time.sleep(2)
-
-    if ip_type == 'not_tor':
-<<<<<<< HEAD
-
-
-
-        print('##############################')
-        current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
-        current_interface = os.popen('ip tuntap show | tail -n 1 | cut -c1-4').read()
-
-        print("ips")
-        print(current_ip)
-        print(previous_ip)
-        print("interfaces")
+    current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
+    current_interface = os.popen('ip tuntap show | tail -n 1 | cut -c1-4').read()
+    if current_ip != previous_ip and current_interface != previous_interface:
         print(current_interface)
-        print(previous_interface)
-        print('##############################')
+        os.popen('sudo service network-manager stop')
+        banner('ip_changed',current_ip, current_interface)
+        raise SystemExit
+    time.sleep(5)
 
-        if current_ip != previous_ip and current_interface != previous_interface:
-            banner('ip_changed',previous_ip)
-            os.popen('sudo service network-manager stop')
-=======
-        previous_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
-        interface = os.popen('ip tuntap show | cut -c1-4').read()
-        if current_ip != previous_ip and interface == '':
-            interface = os.popen('ip tuntap show | cut -c1-4').read()
-            banner('ip_changed',previous_ip)
->>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
-            raise SystemExit
-        time.sleep(5)
+def check_connection_tor(previous_ip):
+
+    r=requests.get(url='https://check.torproject.org/?lang=en')
+    r2=requests.get(url='https://www.dan.me.uk/tornodes')
+    if 'Sorry. You are not using Tor.' in r.text or 'Forbidden' not in r2.text:
+        os.popen('sudo service network-manager stop')
+        current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
+        banner('ip_changed',current_ip)
+        t2.join()
+        raise SystemExit
+    else:
+        current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
+        if current_ip != previous_ip and current_ip != '':
+            print(fore.LIGHT_GREEN + style.BOLD + "TOR IP changing..." + style.RESET)
+            previous_ip = current_ip
+            print("Your " + style.BOLD + "new TOR IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + current_ip + style.RESET)
+            print(fore.LIGHT_GREEN + style.BOLD + "Running..." + style.RESET)
+        time.sleep(2)
 
 def change_tor_ip():
 
     os.popen('sudo torghost -r >/dev/null')
 
-def banner(type, ip=None):
-
-<<<<<<< HEAD
+def banner(type, ip=None, interface=None):
 
 
-=======
->>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
     if type == 'tor' or type == 'tor_changing':
         os.system('clear')
-        print ("Your " + style.BOLD + "current IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + current_ip + style.RESET)
+        print ("Your " + style.BOLD + "current IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + ip + style.RESET)
         print("If your IP is not a TOR exit node, you will be noticed and the script will turn off your network manager")
         print(fore.LIGHT_GREEN + style.BOLD + "Running..." + style.RESET)
 
     if type == 'not_tor':
-        os.system('clear')
-<<<<<<< HEAD
-
-        interface = os.popen('ip tuntap show | tail -n 1 | cut -c1-4').read()
-=======
->>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
-        print("The script will use your first VPN interface, it will not work well if you use several VPNs at the same time")
+        #os.system('clear')
+        print("!!The script will use your last VPN interface")
         print(fore.LIGHT_GREEN + style.BOLD + "Checking VPN network interface and IP..." + style.RESET)
-        print ("Your " + style.BOLD + "current IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + current_ip + style.RESET)
-        print ("Your " + style.BOLD + "VPN network interface " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + interface + style.RESET)
+        print ("Your " + style.BOLD + "current IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + ip + style.RESET)
+        print ("Your " + style.BOLD + "VPN network interface " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + str(interface) + style.RESET)
         print("If your IP changes, you will be noticed and the script will turn off your network manager")
         print(fore.LIGHT_GREEN + style.BOLD + "Running..." + style.RESET)
 
@@ -139,7 +97,7 @@ def ip_type():
     else:
         print('Wrong input')
 
-def options():
+def options(current_ip):
 
     os.system('clear')
     print ("Your current IP is : " + fore.LIGHT_GREEN + style.BOLD + current_ip + style.RESET)
@@ -156,48 +114,39 @@ def options():
 
 def main():
 
-    global current_ip
-    global ip_type
+    global t1
+    global t2
     t = 0
     current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
-<<<<<<< HEAD
     current_interface = os.popen('ip tuntap show | tail -n 1 | cut -c1-4').read()
-=======
->>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
 
     if os.geteuid() != 0:
         exit("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'. Exiting.")
         raise SystemExit
 
-    ip_type = options()
-    banner(ip_type)
-<<<<<<< HEAD
-
-=======
->>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
+    ip_type = options(current_ip)
+    banner(ip_type, current_ip, current_interface)
     while True:
         try:
             if ip_type == 'tor_changing':
 
-                t2 = threading.Thread(name='daemon1', target=change_tor_ip())
-                t1 = threading.Thread(name='daemon2', target=check_connection(ip_type, t2))
-                t1.setDaemon(True)
-                t2.setDaemon(True)
+                t1 = Process(target=change_tor_ip())
+                t2 = Process(check_connection_tor(t2))
+                #t2 = threading.Thread(name='daemon1', target=change_tor_ip())
+                #t1 = threading.Thread(name='daemon2', target=check_connection(ip_type, t2))
+                #t1.setDaemon(True)
+                #t2.setDaemon(True)
                 t1.start()
                 t = t+1
                 if t ==3:
                     t2.start()
+                    t2.join()
+                    t2.terminate()
 
+            if ip_type == 'tor':
+                check_connection_tor(current_ip)
             else:
-<<<<<<< HEAD
-
-                check_connection(ip_type,current_ip,current_interface)
-
-
-
-=======
-                check_connection(ip_type)
->>>>>>> e5346c362973bfe0c311bac9fd6785d3a960a5e5
+                check_connection_VPN(current_ip, current_interface)
 
         except requests.exceptions.ConnectTimeout:
             t = time.localtime()
@@ -223,4 +172,7 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         print ("\n Bye1")
+        t1.terminate()
+        print(t1.get_native_id())
+        print(t2.get_native_id())
         raise SystemExit
