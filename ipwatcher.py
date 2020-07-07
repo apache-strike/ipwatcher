@@ -20,7 +20,7 @@ def check_connection_VPN(previous_ip, previous_interface):
         raise SystemExit
     time.sleep(5)
 
-def check_connection_tor(previous_ip):
+def check_tor_connection(current_ip):
 
     r=requests.get(url='https://check.torproject.org/?lang=en')
     r2=requests.get(url='https://www.dan.me.uk/tornodes')
@@ -28,16 +28,13 @@ def check_connection_tor(previous_ip):
         os.popen('sudo service network-manager stop')
         current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
         banner('ip_changed',current_ip)
-        t2.join()
         raise SystemExit
-    else:
-        current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
-        if current_ip != previous_ip and current_ip != '':
-            print(fore.LIGHT_GREEN + style.BOLD + "TOR IP changing..." + style.RESET)
-            previous_ip = current_ip
-            print("Your " + style.BOLD + "new TOR IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + current_ip + style.RESET)
-            print(fore.LIGHT_GREEN + style.BOLD + "Running..." + style.RESET)
-        time.sleep(2)
+
+def tor_ip_changed(current_ip, previous_ip):
+
+    if current_ip != previous_ip and current_ip != '':
+        banner('tor_changed', current_ip)
+    time.sleep(2)
 
 def change_tor_ip():
 
@@ -67,6 +64,11 @@ def banner(type, ip=None, interface=None):
         print("Turning off network interface ...")
         print(fore.RED + style.BOLD + "Network interface DOWN" + style.RESET)
         print('To restart your network-manager type: ' + fore.BLUE + 'sudo service network-manager start' )
+
+    if type == 'tor_changed':
+        print(fore.LIGHT_GREEN + style.BOLD + "TOR IP changing..." + style.RESET)
+        print("Your " + style.BOLD + "new TOR IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + ip + style.RESET)
+        print(fore.LIGHT_GREEN + style.BOLD + "Running..." + style.RESET)
 
 
 def ip_type():
@@ -131,7 +133,7 @@ def main():
             if ip_type == 'tor_changing':
 
                 t1 = Process(target=change_tor_ip())
-                t2 = Process(check_connection_tor(t2))
+                t2 = Process(check_tor_connection(t2))
                 #t2 = threading.Thread(name='daemon1', target=change_tor_ip())
                 #t1 = threading.Thread(name='daemon2', target=check_connection(ip_type, t2))
                 #t1.setDaemon(True)
@@ -144,7 +146,11 @@ def main():
                     t2.terminate()
 
             if ip_type == 'tor':
-                check_connection_tor(current_ip)
+                check_tor_connection(current_ip)
+                previous_ip = current_ip
+                current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
+                tor_ip_changed(current_ip, previous_ip)
+
             else:
                 check_connection_VPN(current_ip, current_interface)
 
