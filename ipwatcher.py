@@ -14,7 +14,6 @@ def check_connection_VPN(previous_ip, previous_interface):
     current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
     current_interface = os.popen('ip tuntap show | tail -n 1 | cut -c1-4').read()
     if current_ip != previous_ip and current_interface != previous_interface:
-        print(current_interface)
         os.popen('sudo service network-manager stop')
         banner('ip_changed',current_ip, current_interface)
         raise SystemExit
@@ -26,7 +25,6 @@ def check_tor_connection(current_ip):
     r2=requests.get(url='https://www.dan.me.uk/tornodes')
     if 'Sorry. You are not using Tor.' in r.text or 'Forbidden' not in r2.text:
         os.popen('sudo service network-manager stop')
-        current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
         banner('ip_changed',current_ip)
         raise SystemExit
 
@@ -71,7 +69,7 @@ def banner(type, ip=None, interface=None):
         print(fore.LIGHT_GREEN + style.BOLD + "Running..." + style.RESET)
 
 
-def ip_type():
+def check_ip_type():
 
     print("Are you using TOR? [yY/nN]")
     option = str(input())
@@ -84,8 +82,9 @@ def ip_type():
             raise SystemExit
         else:
 
-            print("Would you like to change your TOR IP every 15 seconds? [yY/nN]")
+            print("Would you like to change your TOR IP every ~7 seconds? [yY/nN]")
             print(fore.RED + style.BOLD + "You will need to install and use torghost first" + style.RESET)
+            print(fore.RED + style.BOLD + "https://github.com/SusmithKrishnan/torghost.git" + style.RESET)
             option = str(input())
             if option == 'y' or option == 'Y':
                 return 'tor_changing'
@@ -108,7 +107,7 @@ def options(current_ip):
     print ("   2) Exit")
     option = input()
     if option == '1':
-        return ip_type()
+        return check_ip_type()
     if option == '2':
         raise SystemExit
     else:
@@ -116,8 +115,7 @@ def options(current_ip):
 
 def main():
 
-    global t1
-    global t2
+    global ip_type
     t = 0
     current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
     current_interface = os.popen('ip tuntap show | tail -n 1 | cut -c1-4').read()
@@ -132,18 +130,19 @@ def main():
         try:
             if ip_type == 'tor_changing':
 
-                t1 = Process(target=change_tor_ip())
-                t2 = Process(check_tor_connection(t2))
-                #t2 = threading.Thread(name='daemon1', target=change_tor_ip())
-                #t1 = threading.Thread(name='daemon2', target=check_connection(ip_type, t2))
-                #t1.setDaemon(True)
-                #t2.setDaemon(True)
+                t1 = Process(check_tor_connection(current_ip))
                 t1.start()
+                previous_ip = current_ip
+                current_ip = str.rstrip(os.popen('curl -s ifconfig.io').read())
+                tor_ip_changed(current_ip, previous_ip)
+                t2 = Process(target=change_tor_ip())
                 t = t+1
                 if t ==3:
                     t2.start()
+                    #t2_pid = t2.pid
                     t2.join()
                     t2.terminate()
+                    t = 0
 
             if ip_type == 'tor':
                 check_tor_connection(current_ip)
@@ -177,8 +176,6 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print ("\n Bye1")
-        t1.terminate()
-        print(t1.get_native_id())
-        print(t2.get_native_id())
+        if ip_type == 'tor_changing':
+            os.popen('sudo killall torghost >/dev/null')
         raise SystemExit
