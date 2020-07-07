@@ -6,7 +6,6 @@ import os
 import time
 import requests
 from colored import fore, back, style
-#import threading
 from multiprocessing import Process, Lock
 
 def check_connection_VPN(previous_ip, previous_interface):
@@ -48,7 +47,7 @@ def banner(type, ip=None, interface=None):
         print(fore.LIGHT_GREEN + style.BOLD + "Running..." + style.RESET)
 
     if type == 'not_tor':
-        #os.system('clear')
+        os.system('clear')
         print("!!The script will use your last VPN interface")
         print(fore.LIGHT_GREEN + style.BOLD + "Checking VPN network interface and IP..." + style.RESET)
         print ("Your " + style.BOLD + "current IP " + style.RESET + "is : " + fore.LIGHT_GREEN + style.BOLD + ip + style.RESET)
@@ -139,7 +138,6 @@ def main():
                 t = t+1
                 if t ==3:
                     t2.start()
-                    #t2_pid = t2.pid
                     t2.join()
                     t2.terminate()
                     t = 0
