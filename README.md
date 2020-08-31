@@ -6,6 +6,9 @@ Ipwatcher can also check if your public IP is a TOR node. It can also change you
 ## Setup
 
 sudo apt install torghost
+pip3 install requests colored multiprocessing
+
+git clone https://github.com/9426/ipwatcher.git
 
 ## Usage
 
